@@ -32,8 +32,7 @@ T_tr (id2,:) = [];
         
 %% parameter setting
  nbits = [128];       maxItr = [10];       lambda = [10000];
- muta = [1];         theta = [0.001];       turn = 3; 
-%  maxItr = 13;         
+ muta = [1];         theta = [0.001];       turn = 3;        
           
 l = 1; %excel writing parameter           
 %                 lambda = [0.1,1,10,100, 1000, 10000,100000, 1000000,10000000];
@@ -82,7 +81,7 @@ for bi = 1:length(nbits)
                     param.muta = muta(k);   param.theta=theta(r);   param.nbits = nbits(bi);
                     param.maxItr = maxItr(i); 
                     param.nchunks = min(param.xchunks,param.ychunks);
-                     t1 = clock;
+
                     for chunki = 1:param.nchunks
                     fprintf('-----chunk----- %3d\n', chunki);
                     if chunki <param.nchunks
@@ -98,22 +97,14 @@ for bi = 1:length(nbits)
                     end
                     GX_new = NormalizeFea(LXTrain_new,1);
                     GY_new = NormalizeFea(LYTrain_new,1);
-%                     Hash code learning
+%%                   Hash code learning
                    
                     if chunki == 1
-                    
                      [XTrain,YTrain,BBX,BBY,XW,YW,HH] = BMCH0(XTrain_new',YTrain_new',GX_new,GY_new,param);
-%                      g(chunki,:)= f;
-%                         eva_info_ = evaluate_chunk(XKTrain,YKTrain,LXChunk,LYChunk,XKTest,YKTest,L_te,param,BBX,BBY,XW,YW,chunki);
+
                     else
                      [BBX,BBY,XW,YW,HH,Q,V] = BMCH(XTrain_new',YTrain_new',GX_new,GY_new,BBX,BBY,HH,param,XTrain,YTrain);
-%                         eva_info_ = evaluate_chunk(XKTrain,YKTrain,LXChunk,LYChunk,XKTest,YKTest,L_te,param,BBX,BBY,XW,YW,chunki);
-%                      g(chunki,:)= f;
                     end
-%                       i2t(chunki)=eva_info_.Image_VS_Text_MAP;
-%                       t2i(chunki)=eva_info_.Text_VS_Image_MAP;
-%                      t2 = clock;
-%                      t(chunki) = etime(t2,t1);
                      
                        end        
                    BBX = BBX'; BBY = BBY';
@@ -148,8 +139,7 @@ for bi = 1:length(nbits)
              end
         end
     end
-%         xlswrite('covergence.xlsx',arry,'sheel1','A02');
-%        save('parameter','GX_new','GY_new','BBX','BBY','Q','V');
+%         xlswrite('NUSWIDE.xlsx',arry,'sheel1','A02');
 end
 
   end

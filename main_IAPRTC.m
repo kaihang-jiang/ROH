@@ -22,21 +22,13 @@ L_tr2 = L_tr;
 L_tr2(id2,:) = [];
 I_tr (id1,:) = [];
 T_tr (id2,:) = [];
-%  R = randperm(size(L_tr1,1));
-%  L_tr1 = L_tr1(R,:);
-%  I_tr = I_tr(R,:);
-% I_te = bsxfun(@minus, I_te, mean(I_tr, 1));     
-% I_tr = bsxfun(@minus, I_tr, mean(I_tr, 1));    
-% T_te = bsxfun(@minus, T_te, mean(T_tr, 1));    
-% T_tr = bsxfun(@minus, T_tr, mean(T_tr, 1));
         
 %% parameter setting
  nbits = [128];       maxItr = [10];              lambda = [10000];
- muta = [1];         theta = [0.01];       M = [0];
-%  maxItr = 13;         
+ muta = [1];         theta = [0.01];           
 turn = 10;             func = 'linear';
 l = 1; %excel writing parameter
-%           maxItr = [1:50];             
+            
 %                  lambda = [0 0.1,1,10,100, 1000, 10000,100000, 1000000,10000000];
 %                  muta =  [0.0001,0.001,0.01,0.1,1,10,100,1000,10000];
 %                  theta = [0.000001,0.00001,0.0001,0.001,0.01,0.1,1,10,100];
@@ -75,10 +67,10 @@ for bi = 1:length(nbits)
                     LXChunk{param.nchunks,1} = L_tr1(param.chunksize*subi+1:end,:);
                     LYChunk{param.nchunks,1} = L_tr2(param.chunksize*subi+1:end,:);
                     clear X Y L
-                     param.M = M;  param.func = func;  param.lambda = lambda(j);
+                    param.func = func;  param.lambda = lambda(j);
                     param.muta = muta(k);   param.theta=theta(r);   param.nbits = nbits(bi);
                     param.maxItr = maxItr(i);
-                    t1 = clock;
+                   
                     for chunki = 1:param.nchunks
                     fprintf('-----chunk----- %3d\n', chunki);
                     XTrain_new = XChunk{chunki,:};
@@ -90,20 +82,11 @@ for bi = 1:length(nbits)
                     % Hash code learning
                     if chunki == 1
                     [XTrain,YTrain,BBX,BBY,XW,YW,HH] = BMCH0(XTrain_new',YTrain_new',GX_new,GY_new,param);
-%                   g(chunki,:)= f;
-%                        eva_info_ = evaluate_chunk(XKTrain,YKTrain,LXChunk,LYChunk,XKTest,YKTest,L_te,param,BBX,BBY,XW,YW,chunki);
                     else
                      [BBX,BBY,XW,YW,HH,Q,V] = BMCH(XTrain_new',YTrain_new',GX_new,GY_new,BBX,BBY,HH,param,XTrain,YTrain);
-%                   g(chunki,:)= f;
-%                    eva_info_ = evaluate_chunk(XKTrain,YKTrain,LXChunk,LYChunk,XKTest,YKTest,L_te,param,BBX,BBY,XW,YW,chunki);
-
-                    end
-%                      i2t(chunki)=eva_info_.Image_VS_Text_MAP;
-%                      t2i(chunki)=eva_info_.Text_VS_Image_MAP;
-                    t2 = clock;
-                    t(chunki) = etime(t2,t1);
-                     
-                    end        
+                    end 
+                    end    
+                    
                    BBX = BBX'; BBY = BBY';
                    BX = cell2mat(BBX(:,1:end));
                    BY = cell2mat(BBY(:,1:end));
@@ -136,8 +119,7 @@ for bi = 1:length(nbits)
              end
         end
     end
-        xlswrite('covergence.xlsx',arry,'sheel1','A02');
-%        save('parameter','GX_new','GY_new','BBX','BBY','Q','V');
+%         xlswrite('IAPRTC.xlsx',arry,'sheel1','A02');
 end
 
  end

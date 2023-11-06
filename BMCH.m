@@ -11,24 +11,21 @@ function [BBX,BBY,XW,YW,HH,Q,V,XTrain,YTrain] = BMCH(XTrain_new,YTrain_new,GXTra
     BX_new = sign(randn(nbits, n)); 
     BY_new = sign(randn(nbits, n1));
     Q_new =  rand(c,nbits);
-%     XTrain{1,end+1} = XTrain_new;
-%     YTrain{1,end+1} = YTrain_new;
-%     XKTrain = cell2mat(XTrain(1:end));
-%     YKTrain = cell2mat(YTrain(1:end));
+    
     [Ux, ~, ~] = svd(XTrain_new);
     [Uy, ~, ~] = svd(YTrain_new);
     U_x=Ux(1:nbits,:);
     U_y=Uy(1:nbits,:);
     
     for i = 1:max_iter
-        %fprintf('iteration %3d\n', i);
-       %% update Bt 
+        
+       %% update D_t 
         Jx = (HH{1,4} + BX_new*XTrain_new')*pinv(HH{1,6} + XTrain_new*XTrain_new')*Ux;
          for j=1:d1
               if norm(Jx(:,j),2)~=0 && norm(U_x(:,j),2)~=0
-              ax(j) = (Jx(:,j)'*U_x(:,j))/(norm(Jx(:,j))'*norm(U_x(:,j)));
+              dx(j) = (Jx(:,j)'*U_x(:,j))/(norm(Jx(:,j))'*norm(U_x(:,j)));
               else
-              ax(j) = 0;
+              dx(j) = 0;
               end
          end 
 
@@ -37,12 +34,12 @@ function [BBX,BBY,XW,YW,HH,Q,V,XTrain,YTrain] = BMCH(XTrain_new,YTrain_new,GXTra
         Jy = (HH{1,5} + BY_new*YTrain_new')*pinv(HH{1,7} + YTrain_new*YTrain_new')*Uy;
        for j=1:d2
                if norm(Jy(:,j),2)~=0 && norm(U_y(:,j),2)~=0
-               ay(j) = (Jy(:,j)'*U_y(:,j))/(norm(Jy(:,j))*norm(U_y(:,j)));
+               dy(j) = (Jy(:,j)'*U_y(:,j))/(norm(Jy(:,j))*norm(U_y(:,j)));
                else
-               ay(j) = 0;
+               dy(j) = 0;
                end
        end 
-        
+      %% update V_new
         Z = lambda*GXTrain_new'*Q_new;
         Temp = Z'*Z-1/n*(Z'*ones(n,1)*(ones(1,n)*Z));
         [~,Lmd,RR] = svd(Temp);
@@ -53,17 +50,17 @@ function [BBX,BBY,XW,YW,HH,Q,V,XTrain,YTrain] = BMCH(XTrain_new,YTrain_new,GXTra
         U = sqrt(n)*[P P_]*[R R_]';
         V_new = U';  
         
-        %% update Q
+        %% update Q_new
         Q_new = (lambda*(n+HH{1,10})*eye(c)+muta*nbits^2*(GXTrain_new*GXTrain_new'+GYTrain_new*GYTrain_new'+HH{1,1}))\...
             (lambda*(GXTrain_new*V_new'+HH{1,2})+muta*nbits*(GXTrain_new*BX_new'+GYTrain_new*BY_new'+HH{1,3}));   
        
-        %% update B
-         BX_new = sign(muta*nbits*Q_new'*GXTrain_new+U_x*diag(ax)*Ux'*XTrain_new);
+        %% update B_new
+         BX_new = sign(muta*nbits*Q_new'*GXTrain_new+U_x*diag(dx)*Ux'*XTrain_new);
          BX_new(BX_new==0)=-1;
-         BY_new = sign(muta*nbits*Q_new'*GYTrain_new+U_y*diag(ay)*Uy'*YTrain_new);
+         BY_new = sign(muta*nbits*Q_new'*GYTrain_new+U_y*diag(dy)*Uy'*YTrain_new);
          BY_new(BY_new==0)=-1;
-%         loss = norm(BX_new-U_x*diag(ones(1,d1)-ax)*Ux'*XTrain_new,2);
-%         loss1 = norm(BY_new-U_y*diag(ones(1,d2)-ay)*Uy'*YTrain_new,2');
+%         loss = norm(BX_new-U_x*diag(ax)*Ux'*XTrain_new,2);
+%         loss1 = norm(BY_new-U_y*diag(ay)*Uy'*YTrain_new,2');
 %         P1 = lambda*norm(GXTrain_new-Q_new*V_new,'fro')^2;
 %         P2 = muta*(norm(BX_new-nbits*Q_new'*GXTrain_new,'fro')^2 +norm(BY_new-nbits*Q_new'*GYTrain_new,'fro')^2);
 %         P3 = loss+loss1;

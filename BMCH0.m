@@ -30,9 +30,9 @@ function [XTrain,YTrain,BBX,BBY,XW,YW,HH,f] = BMCH0(XTrain_new,YTrain_new,GXTrai
       for j=1:d1
       a = norm(Jx(:,j),2); b = norm(U_x(:,j),2);
       if a==0 || b==0
-      ax(j) = 0;
+      dx(j) = 0;
       else
-      ax(j) = (Jx(:,j)'*U_x(:,j))/(a*b);
+      dx(j) = (Jx(:,j)'*U_x(:,j))/(a*b);
       end
       
       end 
@@ -42,12 +42,13 @@ function [XTrain,YTrain,BBX,BBY,XW,YW,HH,f] = BMCH0(XTrain_new,YTrain_new,GXTrai
        for j=1:d2
        a = norm(Jy(:,j),2); b = norm(U_y(:,j),2);    
        if a==0 || b==0
-       ay(j) = 0;
+       dy(j) = 0;
        else
-       ay(j) = (Jy(:,j)'*U_y(:,j))/(a*b);
+       dy(j) = (Jy(:,j)'*U_y(:,j))/(a*b);
        end
        end 
        clear j 
+       
        %% update V_new
         Z = lambda*GXTrain_new'*Q_new;
         Temp = Z'*Z-1/n*(Z'*ones(n,1)*(ones(1,n)*Z));
@@ -59,14 +60,14 @@ function [XTrain,YTrain,BBX,BBY,XW,YW,HH,f] = BMCH0(XTrain_new,YTrain_new,GXTrai
         U = sqrt(n)*[P P_]*[R R_]';
         V_new = U';
         
-       %% update Q   
+       %% update Q_new   
         Q_new = pinv(lambda*n*eye(c)+muta*nbits^2*(GXTrain_new*GXTrain_new'+GYTrain_new*GYTrain_new'))\...
             (lambda*GXTrain_new*V_new'+muta*nbits*(GXTrain_new*BX_new'+GYTrain_new*BY_new'));
        
-        %% update B
-        BX_new = sign(muta*nbits*Q_new'*GXTrain_new+U_x*diag(ax)*Ux'*XTrain_new);
+        %% update B_new
+        BX_new = sign(muta*nbits*Q_new'*GXTrain_new+U_x*diag(dx)*Ux'*XTrain_new);
         BX_new(BX_new==0)=-1;
-        BY_new = sign(muta*nbits*Q_new'*GYTrain_new+U_y*diag(ay)*Uy'*YTrain_new);
+        BY_new = sign(muta*nbits*Q_new'*GYTrain_new+U_y*diag(dy)*Uy'*YTrain_new);
         BY_new(BY_new==0)=-1;
 %         loss = norm(BX_new-U_x*diag(ones(1,d1)-ax)*Ux'*YTrain_new,2);
 %         loss1 = norm(BY_new-U_y*diag(ones(1,d2)-ay)*Uy'*YTrain_new,2');
@@ -78,7 +79,7 @@ function [XTrain,YTrain,BBX,BBY,XW,YW,HH,f] = BMCH0(XTrain_new,YTrain_new,GXTrai
         
 %           fprintf('The iteration is : %i and f val is : %f \n', i, f(i));   
     end
-    
+    %% deliver variables into next chunk
     H1_new = GXTrain_new*GXTrain_new'+GYTrain_new*GYTrain_new';
     H2_new = GXTrain_new*V_new';
     H3_new = GXTrain_new*BX_new'+GYTrain_new*BY_new';
